@@ -279,106 +279,7 @@ Dự án hiện đã hoàn thành các chức năng chính sau:
 
 ---
 
-## 7. Hướng dẫn chạy project
-
-### Bước 1: Chuẩn bị môi trường
-
-Cần cài đặt:
-
-- Visual Studio 2022
-- .NET 8 SDK
-- SQL Server LocalDB
-- Redis
-- Git nếu cần clone source
-
-### Bước 2: Cấu hình database
-
-Kiểm tra chuỗi kết nối trong file:
-
-```text
-ASC.Web/appsettings.json
-```
-
-Ví dụ:
-
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ASC_Lab_Db;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
-}
-```
-
-### Bước 3: Cấu hình email
-
-Trong `appsettings.json`, cấu hình email:
-
-```json
-"EmailSettings": {
-  "SmtpServer": "smtp.gmail.com",
-  "SmtpPort": 587,
-  "SenderName": "Automobile Service Center",
-  "SenderEmail": "your-email@gmail.com",
-  "SenderPassword": "your-gmail-app-password"
-}
-```
-
-### Bước 4: Cấu hình Google Login
-
-Trong `appsettings.json`, cấu hình:
-
-```json
-"Authentication": {
-  "Google": {
-    "ClientId": "your-google-client-id",
-    "ClientSecret": "your-google-client-secret"
-  }
-}
-```
-
-### Bước 5: Cấu hình Redis Cache
-
-Trong `appsettings.json`, cấu hình:
-
-```json
-"CacheSettings": {
-  "CacheConnectionString": "127.0.0.1:6379",
-  "CacheInstance": "ASCInstance"
-}
-```
-
-Chạy Redis bằng lệnh:
-
-```bash
-redis-server
-```
-
-Kiểm tra Redis:
-
-```bash
-redis-cli
-keys *
-```
-
-### Bước 6: Cập nhật database
-
-Trong Package Manager Console, chọn project `ASC.Web`, sau đó chạy:
-
-```powershell
-Update-Database
-```
-
-### Bước 7: Chạy project
-
-Chọn project `ASC.Web` làm Startup Project và chạy bằng Visual Studio.
-
-Đường dẫn mặc định:
-
-```text
-https://localhost:7179/
-```
-
----
-
-## 8. Tài khoản đăng nhập mẫu
+## 7. Tài khoản đăng nhập mẫu
 
 Tài khoản Admin mặc định được tạo khi chạy ứng dụng:
 
@@ -398,7 +299,7 @@ Tài khoản User/Customer có thể được tạo thông qua đăng nhập Goo
 
 ---
 
-## 9. Kết luận
+## 8. Kết luận
 
 Thông qua 7 bài lab, em đã xây dựng được một hệ thống ASP.NET Core MVC hoàn chỉnh cho bài toán quản lý trung tâm dịch vụ ô tô. Dự án đã áp dụng nhiều kiến thức quan trọng như kiến trúc nhiều tầng, Repository Pattern, UnitOfWork Pattern, Entity Framework Core, ASP.NET Core Identity, Google OAuth, kiểm thử đơn vị, quản lý dữ liệu Master Data, Redis cache và quản lý yêu cầu dịch vụ theo phân quyền.
 
