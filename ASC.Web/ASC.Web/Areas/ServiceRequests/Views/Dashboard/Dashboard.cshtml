@@ -1,0 +1,96 @@
+@model DashboardViewModel
+
+@{
+    ViewData["Title"] = "Service Requests Dashboard";
+    Layout = "_SecureLayout";
+}
+
+<div class="section">
+    <div class="row">
+        <div class="col s12">
+            <h4 class="teal-text text-darken-2">Service Requests Dashboard</h4>
+
+            <p class="grey-text">
+                Role: <strong>@Model.CurrentRole</strong> |
+                User: <strong>@Model.CurrentUserEmail</strong>
+            </p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="card-panel green lighten-4 green-text text-darken-4">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col s12 m3">
+            <div class="card teal">
+                <div class="card-content white-text center-align">
+                    <span class="card-title">Total</span>
+                    <h4>@Model.TotalRequests</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m3">
+            <div class="card blue">
+                <div class="card-content white-text center-align">
+                    <span class="card-title">New</span>
+                    <h4>@Model.NewRequests</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m3">
+            <div class="card amber darken-2">
+                <div class="card-content white-text center-align">
+                    <span class="card-title">In Progress</span>
+                    <h4>@Model.InProgressRequests</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m3">
+            <div class="card green">
+                <div class="card-content white-text center-align">
+                    <span class="card-title">Completed</span>
+                    <h4>@Model.CompletedRequests</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card z-depth-2">
+        <div class="card-content">
+            <div class="row" style="margin-bottom: 0;">
+                <div class="col s12 m8">
+                    <span class="card-title">Service Request List</span>
+                </div>
+
+                <div class="col s12 m4 right-align">
+                    <a asp-area="ServiceRequests"
+                           asp-controller="ServiceRequest"
+                           asp-action="ServiceRequest"
+                           class="btn waves-effect waves-light teal">
+                        New Request
+                        <i class="material-icons right">add</i>
+                    </a>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                @await Html.PartialAsync("~/Areas/ServiceRequests/Views/Shared/_ServiceRequestGrid.cshtml", Model.ServiceRequests)
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#serviceRequestsTable').DataTable();
+        });
+    </script>
+}

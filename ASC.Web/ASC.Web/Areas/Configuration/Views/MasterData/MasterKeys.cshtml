@@ -1,0 +1,156 @@
+﻿@model MasterKeysViewModel
+
+@{
+    ViewData["Title"] = "Master Keys";
+    Layout = "_SecureLayout";
+}
+
+<div class="section">
+    <h4 class="teal-text text-darken-2">Master Data Keys</h4>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="card-panel green lighten-4 green-text text-darken-4">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col s12 m5">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title" id="formTitle">Add Master Key</span>
+
+                    <form asp-area="Configuration"
+                          asp-controller="MasterData"
+                          asp-action="MasterKeys"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input asp-for="MasterKey.Id" type="hidden" id="MasterKey_Id" />
+
+                        <div asp-validation-summary="ModelOnly" class="red-text"></div>
+
+                        <div class="input-field">
+                            <input asp-for="MasterKey.Name" id="MasterKey_Name" />
+                            <label asp-for="MasterKey.Name"></label>
+                            <span asp-validation-for="MasterKey.Name" class="red-text"></span>
+                        </div>
+
+                        <p>
+                            <label>
+                                <input asp-for="MasterKey.IsActive" id="MasterKey_IsActive" type="checkbox" />
+                                <span>Is Active</span>
+                            </label>
+                        </p>
+
+                        <div class="center-align" style="margin-top: 25px;">
+                            <button type="submit" class="btn waves-effect waves-light teal">
+                                Save
+                                <i class="material-icons right">save</i>
+                            </button>
+
+                            <button type="button" id="btnResetForm" class="btn waves-effect waves-light grey">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m7">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title">Master Key List</span>
+
+                    <table id="masterKeysTable" class="striped highlight responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @if (Model.MasterKeys != null && Model.MasterKeys.Any())
+                            {
+                                foreach (var item in Model.MasterKeys)
+                                {
+                                    <tr>
+                                        <td>@item.Name</td>
+                                        <td>
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="new badge green" data-badge-caption="Active"></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="new badge red" data-badge-caption="Inactive"></span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button type="button"
+                                                    class="btn-small waves-effect waves-light amber darken-2 btn-edit-master-key"
+                                                    data-id="@item.Id"
+                                                    data-name="@item.Name"
+                                                    data-isactive="@item.IsActive.ToString().ToLower()">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="center-align grey-text">
+                                        No master keys found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var editButtons = document.querySelectorAll('.btn-edit-master-key');
+
+            editButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    document.getElementById('formTitle').innerText = 'Update Master Key';
+
+                    document.getElementById('MasterKey_Id').value = this.dataset.id;
+                    document.getElementById('MasterKey_Name').value = this.dataset.name;
+                    document.getElementById('MasterKey_IsActive').checked = this.dataset.isactive === 'true';
+
+                    M.updateTextFields();
+                });
+            });
+
+            document.getElementById('btnResetForm').addEventListener('click', function () {
+                document.getElementById('formTitle').innerText = 'Add Master Key';
+
+                document.getElementById('MasterKey_Id').value = '';
+                document.getElementById('MasterKey_Name').value = '';
+                document.getElementById('MasterKey_IsActive').checked = true;
+
+                M.updateTextFields();
+            });
+        });
+
+        $(document).ready(function () {
+            $('#masterKeysTable').DataTable();
+        });
+    </script>
+}

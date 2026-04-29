@@ -1,0 +1,122 @@
+﻿@model NewServiceRequestViewModel
+
+@{
+    ViewData["Title"] = "New Service Request";
+    Layout = "_SecureLayout";
+}
+
+<div class="section">
+    <h4 class="teal-text text-darken-2">New Service Request</h4>
+
+    <div class="row">
+        <div class="col s12 m10 offset-m1">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title">Create Service Request</span>
+
+                    <form asp-area="ServiceRequests"
+                          asp-controller="ServiceRequest"
+                          asp-action="ServiceRequest"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="red-text"></div>
+
+                        <div class="row">
+                            <div class="input-field col s12 m6">
+                                <input asp-for="CustomerEmail" readonly />
+                                <label asp-for="CustomerEmail" class="active"></label>
+                                <span asp-validation-for="CustomerEmail" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field col s12 m6">
+                                <input asp-for="VehicleName" />
+                                <label asp-for="VehicleName"></label>
+                                <span asp-validation-for="VehicleName" class="red-text"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="input-field col s12 m6">
+                                <select asp-for="VehicleType" asp-items="Model.VehicleTypes">
+                                    <option value="">-- Select Vehicle Type --</option>
+                                </select>
+                                <label asp-for="VehicleType"></label>
+                                <span asp-validation-for="VehicleType" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field col s12 m6">
+                                <select asp-for="RequestedServices" asp-items="Model.RequestedServiceList">
+                                    <option value="">-- Select Requested Service --</option>
+                                </select>
+                                <label asp-for="RequestedServices"></label>
+                                <span asp-validation-for="RequestedServices" class="red-text"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="input-field col s12 m6">
+                                <input asp-for="RequestedDate" type="date" />
+                                <label asp-for="RequestedDate" class="active"></label>
+                                <span asp-validation-for="RequestedDate" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field col s12 m6">
+                                <select asp-for="ServiceEngineer" asp-items="Model.ServiceEngineers">
+                                    <option value="">-- Select Service Engineer --</option>
+                                </select>
+                                <label asp-for="ServiceEngineer"></label>
+                                <span asp-validation-for="ServiceEngineer" class="red-text"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="input-field col s12">
+                                <textarea asp-for="Description" class="materialize-textarea"></textarea>
+                                <label asp-for="Description"></label>
+                                <span asp-validation-for="Description" class="red-text"></span>
+                            </div>
+                        </div>
+
+                        <input asp-for="Status" type="hidden" value="New" />
+
+                        <div class="center-align" style="margin-top: 25px;">
+                            <button type="submit" class="btn waves-effect waves-light teal">
+                                Create Request
+                                <i class="material-icons right">send</i>
+                            </button>
+
+                            <a asp-area="ServiceRequests"
+                                   asp-controller="Dashboard"
+                                   asp-action="Dashboard"
+                                   class="btn waves-effect waves-light grey">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-panel blue-grey lighten-5">
+                <strong>Lưu ý:</strong>
+                Nếu dropdown Vehicle Type hoặc Requested Service trống, hãy kiểm tra lại dữ liệu trong
+                <a href="/Configuration/MasterData/MasterValues">Master Values</a>
+                và Redis cache.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var selectElems = document.querySelectorAll('select');
+            M.FormSelect.init(selectElems);
+
+            M.updateTextFields();
+        });
+    </script>
+}

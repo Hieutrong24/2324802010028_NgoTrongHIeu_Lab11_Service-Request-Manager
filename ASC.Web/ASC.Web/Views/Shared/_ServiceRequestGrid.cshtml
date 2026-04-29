@@ -1,0 +1,59 @@
+﻿@model List<ASC.Model.ServiceRequest>
+
+<table id="serviceRequestsTable" class="striped highlight responsive-table">
+    <thead>
+        <tr>
+            <th>Customer Email</th>
+            <th>Vehicle</th>
+            <th>Vehicle Type</th>
+            <th>Requested Service</th>
+            <th>Requested Date</th>
+            <th>Engineer</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CustomerEmail</td>
+                    <td>@item.VehicleName</td>
+                    <td>@item.VehicleType</td>
+                    <td>@item.RequestedServices</td>
+                    <td>@item.RequestedDate.ToString("dd/MM/yyyy")</td>
+                    <td>@(string.IsNullOrWhiteSpace(item.ServiceEngineer) ? "Not assigned" : item.ServiceEngineer)</td>
+                    <td>
+                        @if (item.Status.Equals("New", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span class="new badge blue" data-badge-caption="New"></span>
+                        }
+                        else if (item.Status.Equals("InProgress", StringComparison.OrdinalIgnoreCase) ||
+                                 item.Status.Equals("In Progress", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span class="new badge amber darken-2" data-badge-caption="In Progress"></span>
+                        }
+                        else if (item.Status.Equals("Completed", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <span class="new badge green" data-badge-caption="Completed"></span>
+                        }
+                        else
+                        {
+                            <span class="new badge grey" data-badge-caption="@item.Status"></span>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="center-align grey-text">
+                    No service requests found.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

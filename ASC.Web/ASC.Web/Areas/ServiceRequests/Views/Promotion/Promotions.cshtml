@@ -1,0 +1,306 @@
+﻿@model PromotionsViewModel
+
+@{
+    ViewData["Title"] = "Promotions";
+    Layout = "_SecureLayout";
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="section">
+    <h4 class="teal-text text-darken-2">Promotions</h4>
+
+    <p class="grey-text">
+        Role: <strong>@Model.CurrentRole</strong> |
+        User: <strong>@Model.CurrentUserEmail</strong>
+    </p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="card-panel green lighten-4 green-text text-darken-4">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        @if (isAdmin)
+        {
+            <div class="col s12 m5">
+                <div class="card z-depth-2">
+                    <div class="card-content">
+                        <span class="card-title" id="formTitle">Create Promotion</span>
+
+                        <form asp-area="ServiceRequests"
+                              asp-controller="Promotion"
+                              asp-action="Promotions"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input asp-for="Promotion.Id" type="hidden" id="Promotion_Id" />
+
+                            <div asp-validation-summary="ModelOnly" class="red-text"></div>
+
+                            <div class="input-field">
+                                <input asp-for="Promotion.Title" id="Promotion_Title" />
+                                <label asp-for="Promotion.Title"></label>
+                                <span asp-validation-for="Promotion.Title" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field">
+                                <input asp-for="Promotion.Code" id="Promotion_Code" />
+                                <label asp-for="Promotion.Code"></label>
+                                <span asp-validation-for="Promotion.Code" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field">
+                                <input asp-for="Promotion.DiscountPercent"
+                                       id="Promotion_DiscountPercent"
+                                       type="number"
+                                       min="0"
+                                       max="100"
+                                       step="0.01" />
+                                <label asp-for="Promotion.DiscountPercent"></label>
+                                <span asp-validation-for="Promotion.DiscountPercent" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field">
+                                <input asp-for="Promotion.ApplicableService" id="Promotion_ApplicableService" />
+                                <label asp-for="Promotion.ApplicableService"></label>
+                            </div>
+
+                            <div class="input-field">
+                                <input asp-for="Promotion.StartDate"
+                                       id="Promotion_StartDate"
+                                       type="date" />
+                                <label asp-for="Promotion.StartDate" class="active"></label>
+                                <span asp-validation-for="Promotion.StartDate" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field">
+                                <input asp-for="Promotion.EndDate"
+                                       id="Promotion_EndDate"
+                                       type="date" />
+                                <label asp-for="Promotion.EndDate" class="active"></label>
+                                <span asp-validation-for="Promotion.EndDate" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field">
+                                <textarea asp-for="Promotion.Description"
+                                          id="Promotion_Description"
+                                          class="materialize-textarea"></textarea>
+                                <label asp-for="Promotion.Description"></label>
+                                <span asp-validation-for="Promotion.Description" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field">
+                                <textarea asp-for="Promotion.TermsAndConditions"
+                                          id="Promotion_TermsAndConditions"
+                                          class="materialize-textarea"></textarea>
+                                <label asp-for="Promotion.TermsAndConditions"></label>
+                            </div>
+
+                            <p>
+                                <label>
+                                    <input asp-for="Promotion.IsActive"
+                                           id="Promotion_IsActive"
+                                           type="checkbox" />
+                                    <span>Is Active</span>
+                                </label>
+                            </p>
+
+                            <div class="center-align" style="margin-top: 25px;">
+                                <button type="submit" class="btn waves-effect waves-light teal">
+                                    Save
+                                    <i class="material-icons right">save</i>
+                                </button>
+
+                                <button type="button" id="btnResetPromotionForm" class="btn waves-effect waves-light grey">
+                                    Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col s12 @(isAdmin ? "m7" : "m12")">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title">Promotion List</span>
+
+                    <table id="promotionsTable" class="striped highlight responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Service</th>
+                                <th>Period</th>
+                                <th>Status</th>
+                                <th>Description</th>
+                                @if (isAdmin)
+                                {
+                                    <th>Action</th>
+                                }
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @if (Model.Promotions != null && Model.Promotions.Any())
+                            {
+                                foreach (var item in Model.Promotions)
+                                {
+                                    var isValidNow = item.IsActive
+                                        && item.StartDate.Date <= DateTime.Now.Date
+                                        && item.EndDate.Date >= DateTime.Now.Date;
+
+                                    <tr>
+                                        <td>@item.Title</td>
+                                        <td>
+                                            <span class="new badge blue" data-badge-caption="@item.Code"></span>
+                                        </td>
+                                        <td>@item.DiscountPercent%</td>
+                                        <td>@(string.IsNullOrWhiteSpace(item.ApplicableService) ? "All services" : item.ApplicableService)</td>
+                                        <td>
+                                            @item.StartDate.ToString("dd/MM/yyyy")
+                                            -
+                                            @item.EndDate.ToString("dd/MM/yyyy")
+                                        </td>
+                                        <td>
+                                            @if (isValidNow)
+                                            {
+                                                <span class="new badge green" data-badge-caption="Active"></span>
+                                            }
+                                            else if (!item.IsActive)
+                                            {
+                                                <span class="new badge red" data-badge-caption="Inactive"></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="new badge grey" data-badge-caption="Expired/Upcoming"></span>
+                                            }
+                                        </td>
+                                        <td>@item.Description</td>
+
+                                        @if (isAdmin)
+                                        {
+                                            <td>
+                                                <button type="button"
+                                                        class="btn-small amber darken-2 btn-edit-promotion"
+                                                        data-id="@item.Id"
+                                                        data-title="@item.Title"
+                                                        data-code="@item.Code"
+                                                        data-description="@item.Description"
+                                                        data-discount="@item.DiscountPercent"
+                                                        data-service="@item.ApplicableService"
+                                                        data-startdate="@item.StartDate.ToString("yyyy-MM-dd")"
+                                                        data-enddate="@item.EndDate.ToString("yyyy-MM-dd")"
+                                                        data-terms="@item.TermsAndConditions"
+                                                        data-isactive="@item.IsActive.ToString().ToLower()">
+                                                    Edit
+                                                </button>
+
+                                                <form asp-area="ServiceRequests"
+                                                      asp-controller="Promotion"
+                                                      asp-action="Delete"
+                                                      method="post"
+                                                      style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <button type="submit"
+                                                            class="btn-small red"
+                                                            onclick="return confirm('Delete this promotion?');">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8" class="center-align grey-text">
+                                        No promotions found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @if (!isAdmin)
+            {
+                <div class="card-panel teal lighten-5 teal-text text-darken-4">
+                    <strong>Tip:</strong> Use promotion codes when contacting the service center for supported services.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var textareas = document.querySelectorAll('textarea');
+            textareas.forEach(function (textarea) {
+                M.textareaAutoResize(textarea);
+            });
+
+            var editButtons = document.querySelectorAll('.btn-edit-promotion');
+
+            editButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    document.getElementById('formTitle').innerText = 'Update Promotion';
+
+                    document.getElementById('Promotion_Id').value = this.dataset.id;
+                    document.getElementById('Promotion_Title').value = this.dataset.title;
+                    document.getElementById('Promotion_Code').value = this.dataset.code;
+                    document.getElementById('Promotion_DiscountPercent').value = this.dataset.discount;
+                    document.getElementById('Promotion_ApplicableService').value = this.dataset.service || '';
+                    document.getElementById('Promotion_StartDate').value = this.dataset.startdate;
+                    document.getElementById('Promotion_EndDate').value = this.dataset.enddate;
+                    document.getElementById('Promotion_Description').value = this.dataset.description;
+                    document.getElementById('Promotion_TermsAndConditions').value = this.dataset.terms || '';
+                    document.getElementById('Promotion_IsActive').checked = this.dataset.isactive === 'true';
+
+                    M.updateTextFields();
+                    M.textareaAutoResize(document.getElementById('Promotion_Description'));
+                    M.textareaAutoResize(document.getElementById('Promotion_TermsAndConditions'));
+                });
+            });
+
+            var resetButton = document.getElementById('btnResetPromotionForm');
+
+            if (resetButton) {
+                resetButton.addEventListener('click', function () {
+                    document.getElementById('formTitle').innerText = 'Create Promotion';
+
+                    document.getElementById('Promotion_Id').value = '';
+                    document.getElementById('Promotion_Title').value = '';
+                    document.getElementById('Promotion_Code').value = '';
+                    document.getElementById('Promotion_DiscountPercent').value = '0';
+                    document.getElementById('Promotion_ApplicableService').value = '';
+                    document.getElementById('Promotion_StartDate').value = '';
+                    document.getElementById('Promotion_EndDate').value = '';
+                    document.getElementById('Promotion_Description').value = '';
+                    document.getElementById('Promotion_TermsAndConditions').value = '';
+                    document.getElementById('Promotion_IsActive').checked = true;
+
+                    M.updateTextFields();
+                    M.textareaAutoResize(document.getElementById('Promotion_Description'));
+                    M.textareaAutoResize(document.getElementById('Promotion_TermsAndConditions'));
+                });
+            }
+        });
+
+        $(document).ready(function () {
+            $('#promotionsTable').DataTable();
+        });
+    </script>
+}

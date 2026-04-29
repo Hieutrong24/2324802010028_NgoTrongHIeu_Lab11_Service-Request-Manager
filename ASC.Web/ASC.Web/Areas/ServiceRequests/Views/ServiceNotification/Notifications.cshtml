@@ -1,0 +1,256 @@
+﻿@model ServiceNotificationsViewModel
+
+@{
+    ViewData["Title"] = "Service Notifications";
+    Layout = "_SecureLayout";
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="section">
+    <h4 class="teal-text text-darken-2">Service Notifications</h4>
+
+    <p class="grey-text">
+        Role: <strong>@Model.CurrentRole</strong> |
+        User: <strong>@Model.CurrentUserEmail</strong>
+    </p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="card-panel green lighten-4 green-text text-darken-4">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        @if (isAdmin)
+        {
+            <div class="col s12 m5">
+                <div class="card z-depth-2">
+                    <div class="card-content">
+                        <span class="card-title" id="formTitle">Create Notification</span>
+
+                        <form asp-area="ServiceRequests"
+                              asp-controller="ServiceNotification"
+                              asp-action="Notifications"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input asp-for="Notification.Id" type="hidden" id="Notification_Id" />
+
+                            <div asp-validation-summary="ModelOnly" class="red-text"></div>
+
+                            <div class="input-field">
+                                <input asp-for="Notification.RecipientEmail" id="Notification_RecipientEmail" />
+                                <label asp-for="Notification.RecipientEmail"></label>
+                                <span asp-validation-for="Notification.RecipientEmail" class="red-text"></span>
+                                <small class="grey-text">Use <strong>All</strong> to send to all users.</small>
+                            </div>
+
+                            <div class="input-field">
+                                <input asp-for="Notification.Title" id="Notification_Title" />
+                                <label asp-for="Notification.Title"></label>
+                                <span asp-validation-for="Notification.Title" class="red-text"></span>
+                            </div>
+
+                            <div class="input-field">
+                                <input asp-for="Notification.NotificationType" id="Notification_NotificationType" />
+                                <label asp-for="Notification.NotificationType"></label>
+                            </div>
+
+                            <div class="input-field">
+                                <textarea asp-for="Notification.Message"
+                                          id="Notification_Message"
+                                          class="materialize-textarea"></textarea>
+                                <label asp-for="Notification.Message"></label>
+                                <span asp-validation-for="Notification.Message" class="red-text"></span>
+                            </div>
+
+                            <p>
+                                <label>
+                                    <input asp-for="Notification.IsActive"
+                                           id="Notification_IsActive"
+                                           type="checkbox" />
+                                    <span>Is Active</span>
+                                </label>
+                            </p>
+
+                            <div class="center-align" style="margin-top: 25px;">
+                                <button type="submit" class="btn waves-effect waves-light teal">
+                                    Save
+                                    <i class="material-icons right">save</i>
+                                </button>
+
+                                <button type="button" id="btnResetNotificationForm" class="btn waves-effect waves-light grey">
+                                    Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col s12 @(isAdmin ? "m7" : "m12")">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title">Notification List</span>
+
+                    <table id="notificationsTable" class="striped highlight responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Recipient</th>
+                                <th>Type</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                                <th>Read</th>
+                                <th>Created</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @if (Model.Notifications != null && Model.Notifications.Any())
+                            {
+                                foreach (var item in Model.Notifications)
+                                {
+                                    <tr>
+                                        <td>@item.Title</td>
+                                        <td>@item.RecipientEmail</td>
+                                        <td>@item.NotificationType</td>
+                                        <td>@item.Message</td>
+                                        <td>
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="new badge green" data-badge-caption="Active"></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="new badge red" data-badge-caption="Inactive"></span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.IsRead)
+                                            {
+                                                <span class="new badge blue" data-badge-caption="Read"></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="new badge amber darken-2" data-badge-caption="Unread"></span>
+                                            }
+                                        </td>
+                                        <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @if (!item.IsRead)
+                                            {
+                                                <form asp-area="ServiceRequests"
+                                                      asp-controller="ServiceNotification"
+                                                      asp-action="MarkAsRead"
+                                                      method="post"
+                                                      style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <button type="submit" class="btn-small blue">
+                                                        Read
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            @if (isAdmin)
+                                            {
+                                                <button type="button"
+                                                        class="btn-small amber darken-2 btn-edit-notification"
+                                                        data-id="@item.Id"
+                                                        data-recipient="@item.RecipientEmail"
+                                                        data-title="@item.Title"
+                                                        data-type="@item.NotificationType"
+                                                        data-message="@item.Message"
+                                                        data-isactive="@item.IsActive.ToString().ToLower()">
+                                                    Edit
+                                                </button>
+
+                                                <form asp-area="ServiceRequests"
+                                                      asp-controller="ServiceNotification"
+                                                      asp-action="Delete"
+                                                      method="post"
+                                                      style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@item.Id" />
+                                                    <button type="submit"
+                                                            class="btn-small red"
+                                                            onclick="return confirm('Delete this notification?');">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="8" class="center-align grey-text">
+                                        No notifications found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var textareas = document.querySelectorAll('textarea');
+            M.textareaAutoResize(textareas);
+
+            var editButtons = document.querySelectorAll('.btn-edit-notification');
+
+            editButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    document.getElementById('formTitle').innerText = 'Update Notification';
+
+                    document.getElementById('Notification_Id').value = this.dataset.id;
+                    document.getElementById('Notification_RecipientEmail').value = this.dataset.recipient;
+                    document.getElementById('Notification_Title').value = this.dataset.title;
+                    document.getElementById('Notification_NotificationType').value = this.dataset.type;
+                    document.getElementById('Notification_Message').value = this.dataset.message;
+                    document.getElementById('Notification_IsActive').checked = this.dataset.isactive === 'true';
+
+                    M.updateTextFields();
+                    M.textareaAutoResize(document.getElementById('Notification_Message'));
+                });
+            });
+
+            var resetButton = document.getElementById('btnResetNotificationForm');
+
+            if (resetButton) {
+                resetButton.addEventListener('click', function () {
+                    document.getElementById('formTitle').innerText = 'Create Notification';
+
+                    document.getElementById('Notification_Id').value = '';
+                    document.getElementById('Notification_RecipientEmail').value = 'All';
+                    document.getElementById('Notification_Title').value = '';
+                    document.getElementById('Notification_NotificationType').value = 'General';
+                    document.getElementById('Notification_Message').value = '';
+                    document.getElementById('Notification_IsActive').checked = true;
+
+                    M.updateTextFields();
+                    M.textareaAutoResize(document.getElementById('Notification_Message'));
+                });
+            }
+        });
+
+        $(document).ready(function () {
+            $('#notificationsTable').DataTable();
+        });
+    </script>
+}

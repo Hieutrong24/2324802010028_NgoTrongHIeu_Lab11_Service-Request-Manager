@@ -1,0 +1,218 @@
+﻿@model MasterValuesViewModel
+
+@{
+    ViewData["Title"] = "Master Values";
+    Layout = "_SecureLayout";
+}
+
+<div class="section">
+    <h4 class="teal-text text-darken-2">Master Data Values</h4>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="card-panel green lighten-4 green-text text-darken-4">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col s12 m5">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title" id="formTitle">Add Master Value</span>
+
+                    <form asp-area="Configuration"
+                          asp-controller="MasterData"
+                          asp-action="MasterValues"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input asp-for="MasterValue.Id" type="hidden" id="MasterValue_Id" />
+
+                        <div asp-validation-summary="ModelOnly" class="red-text"></div>
+
+                        <div class="input-field">
+                            <select asp-for="MasterValue.MasterDataKeyId"
+                                    asp-items="Model.MasterKeys"
+                                    id="MasterValue_MasterDataKeyId">
+                                <option value="">-- Select Master Key --</option>
+                            </select>
+                            <label asp-for="MasterValue.MasterDataKeyId"></label>
+                            <span asp-validation-for="MasterValue.MasterDataKeyId" class="red-text"></span>
+                        </div>
+
+                        <div class="input-field">
+                            <input asp-for="MasterValue.Value" id="MasterValue_Value" />
+                            <label asp-for="MasterValue.Value"></label>
+                            <span asp-validation-for="MasterValue.Value" class="red-text"></span>
+                        </div>
+
+                        <p>
+                            <label>
+                                <input asp-for="MasterValue.IsActive"
+                                       id="MasterValue_IsActive"
+                                       type="checkbox" />
+                                <span>Is Active</span>
+                            </label>
+                        </p>
+
+                        <div class="center-align" style="margin-top: 25px;">
+                            <button type="submit" class="btn waves-effect waves-light teal">
+                                Save
+                                <i class="material-icons right">save</i>
+                            </button>
+
+                            <button type="button" id="btnResetForm" class="btn waves-effect waves-light grey">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title">Import Master Values</span>
+
+                    <form asp-area="Configuration"
+                          asp-controller="MasterData"
+                          asp-action="ImportMasterValues"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        @Html.AntiForgeryToken()
+
+                        <div class="file-field input-field">
+                            <div class="btn teal">
+                                <span>File</span>
+                                <input type="file" name="importFile" accept=".xlsx,.xls" />
+                            </div>
+
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text" placeholder="Upload Excel file" />
+                            </div>
+                        </div>
+
+                        <div class="center-align">
+                            <button type="submit" class="btn waves-effect waves-light blue-grey">
+                                Import Excel
+                                <i class="material-icons right">file_upload</i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="grey-text" style="margin-top: 15px;">
+                        Excel format: MasterKey, MasterValue, IsActive
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col s12 m7">
+            <div class="card z-depth-2">
+                <div class="card-content">
+                    <span class="card-title">Master Value List</span>
+
+                    <table id="masterValuesTable" class="striped highlight responsive-table">
+                        <thead>
+                            <tr>
+                                <th>Master Key</th>
+                                <th>Value</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @if (Model.MasterValues != null && Model.MasterValues.Any())
+                            {
+                                foreach (var item in Model.MasterValues)
+                                {
+                                    var keyName = Model.MasterKeys
+                                        .FirstOrDefault(x => x.Value == item.MasterDataKeyId)?.Text ?? item.MasterDataKeyId;
+
+                                    <tr>
+                                        <td>@keyName</td>
+                                        <td>@item.Value</td>
+                                        <td>
+                                            @if (item.IsActive)
+                                            {
+                                                <span class="new badge green" data-badge-caption="Active"></span>
+                                            }
+                                            else
+                                            {
+                                                <span class="new badge red" data-badge-caption="Inactive"></span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <button type="button"
+                                                    class="btn-small waves-effect waves-light amber darken-2 btn-edit-master-value"
+                                                    data-id="@item.Id"
+                                                    data-masterkeyid="@item.MasterDataKeyId"
+                                                    data-value="@item.Value"
+                                                    data-isactive="@item.IsActive.ToString().ToLower()">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="center-align grey-text">
+                                        No master values found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var selectElems = document.querySelectorAll('select');
+            M.FormSelect.init(selectElems);
+
+            var editButtons = document.querySelectorAll('.btn-edit-master-value');
+
+            editButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    document.getElementById('formTitle').innerText = 'Update Master Value';
+
+                    document.getElementById('MasterValue_Id').value = this.dataset.id;
+                    document.getElementById('MasterValue_MasterDataKeyId').value = this.dataset.masterkeyid;
+                    document.getElementById('MasterValue_Value').value = this.dataset.value;
+                    document.getElementById('MasterValue_IsActive').checked = this.dataset.isactive === 'true';
+
+                    M.FormSelect.init(document.querySelectorAll('select'));
+                    M.updateTextFields();
+                });
+            });
+
+            document.getElementById('btnResetForm').addEventListener('click', function () {
+                document.getElementById('formTitle').innerText = 'Add Master Value';
+
+                document.getElementById('MasterValue_Id').value = '';
+                document.getElementById('MasterValue_MasterDataKeyId').value = '';
+                document.getElementById('MasterValue_Value').value = '';
+                document.getElementById('MasterValue_IsActive').checked = true;
+
+                M.FormSelect.init(document.querySelectorAll('select'));
+                M.updateTextFields();
+            });
+        });
+
+        $(document).ready(function () {
+            $('#masterValuesTable').DataTable();
+        });
+    </script>
+}
