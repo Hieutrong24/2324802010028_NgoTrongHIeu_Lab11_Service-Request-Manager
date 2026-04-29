@@ -304,3 +304,13 @@ Tài khoản User/Customer có thể được tạo thông qua đăng nhập Goo
 Thông qua 7 bài lab, em đã xây dựng được một hệ thống ASP.NET Core MVC hoàn chỉnh cho bài toán quản lý trung tâm dịch vụ ô tô. Dự án đã áp dụng nhiều kiến thức quan trọng như kiến trúc nhiều tầng, Repository Pattern, UnitOfWork Pattern, Entity Framework Core, ASP.NET Core Identity, Google OAuth, kiểm thử đơn vị, quản lý dữ liệu Master Data, Redis cache và quản lý yêu cầu dịch vụ theo phân quyền.
 
 Dự án ASC Web giúp em hiểu rõ hơn về cách xây dựng một ứng dụng web thực tế, có cấu trúc rõ ràng, dễ mở rộng và có thể phát triển thêm nhiều chức năng trong tương lai.
+
+
+##Link video demo:
+- https://youtu.be/UoM23bv_Q44
+- https://youtu.be/wtZl_8y0U38
+- https://youtu.be/ticc7p5ncSM
+- https://youtu.be/uyIh7cjddWo
+- https://youtu.be/deSlOBSEHWc
+- https://youtu.be/uDgpHx0epHE
+- https://youtu.be/evhX1uApn4g
